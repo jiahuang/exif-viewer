@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ExifInfo from './ExifInfo.jsx';
-import BinaryView from './BinaryView.jsx';
+// import ExifInfo from './ExifInfo.jsx';
+// import BinaryView from './BinaryView.jsx';
 
 var ExifPage = React.createClass({
   getInitialState: function() {
@@ -10,15 +10,17 @@ var ExifPage = React.createClass({
     return(
       <div>
         <div>
-          <img className="picture" />
+          {/* <Image source={require('./images/geotag.jpg')} />*/}
           <button className="uploadPicture">Upload Picture</button>
         </div>
+        {/*
         <div>
           <ExifInfo bytes={this.state.bytes} />
         </div>
         <div>
           <BinaryView bytes={this.state.bytes}/>
         </div>
+        */}
       </div>
     )
   }
