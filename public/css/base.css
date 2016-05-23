@@ -1,0 +1,29 @@
+.exifInfo{
+	font-family: monospace;
+	font-size: 15px;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: 400;
+	line-height: 16.5px;
+  margin: 20px;
+}
+
+.hexMem{
+  margin-right: 10px;
+}
+
+.memRow{
+  margin: 5px 0px;
+}
+
+.byte{
+  padding: 3px 5px;
+}
+
+.highlighted {
+  background-color: blue;
+}
+
+span[data-block] {
+  background-color: yellow;
+}

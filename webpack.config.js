@@ -15,16 +15,21 @@ module.exports = {
             test: /\.jsx?$/,
             include: APP_DIR,
             loader: 'babel',
-        }]
-    },
-    plugins: [
-        new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: false,
-            },
-            output: {
-                comments: false,
-            },
-        }),
-    ]
+          }, {
+            test: /\.jpe?g$|\.gif$|\.png$/i,
+            loader: 'file-loader'
+          }
+      ]
+    }
+    // ,
+    // plugins: [
+    //     new webpack.optimize.UglifyJsPlugin({
+    //         compress: {
+    //             warnings: false,
+    //         },
+    //         output: {
+    //             comments: false,
+    //         },
+    //     }),
+    // ]
 }
