@@ -3,16 +3,21 @@ import ReactDOM from 'react-dom';
 import EXIF from './exiflib.js';
 // import request from 'superagent';
 import ExifInfo from './ExifInfo.jsx';
-// import BinaryView from './BinaryView.jsx';
+import InfoDisplay from './InfoDisplay.jsx';
 
+var DEBUG= false;
 var geotag = "https://raw.githubusercontent.com/jiahuang/exif-viewer/master/app/images/geotag.jpg";
 
 var ExifPage = React.createClass({
   getInitialState: function() {
+    this.getImageFromURL(this.props.image)
+    return {state: null, image: this.props.image, tempImage: ""}
+  },
+  getImageFromURL: function(url){
     var that = this;
 
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", this.props.image);
+    xhr.open("GET", url);
     xhr.responseType = "blob";
     xhr.onload = function()
     {
@@ -22,45 +27,55 @@ var ExifPage = React.createClass({
       file.readAsArrayBuffer(blob);
       file.addEventListener("loadend", function(e)
       {
-        // console.log("result", e.target.result);
         var exif = EXIF.readFromBinaryFile(e.target.result);
-
-        // that.setState({"bytes": e.target.result})
-        console.log("exif", exif);
-        console.log("bytes", EXIF.bytes);
-        that.setState({"byteData": EXIF.bytes})
-
-        // console.log("result", file.result);
+        if (DEBUG){
+          console.log("exif", exif);
+          console.log("bytes", EXIF.bytes);
+        }
 
         var binaryReader = new FileReader();
-        var lastOffset = EXIF.bytes[EXIF.bytes.length-1].offset
+        var sortedBytes = EXIF.bytes.sort(function(a, b){
+          return a.offset < b.offset ? -1 : 1;
+        });
+        that.setState({info: {}, "byteData": sortedBytes, "exif": exif})
+        var lastOffset = sortedBytes[sortedBytes.length-1].offset
         var lastByte = lastOffset+32-lastOffset%16
-        console.log("last offset", lastOffset, blob.size);
         binaryReader.readAsBinaryString(blob.slice(0, lastOffset > blob.size ? blob.size : lastByte));
         binaryReader.addEventListener("loadend", function(e)
         {
           var markup = that.showResult(binaryReader, "Binary");
-          console.log("markup", markup);
-          EXIF.bytes.forEach(function(b, index){
+          sortedBytes.forEach(function(b, index){
             for(var i = 0; i<b.bytes.length; i++){
               var m = markup[b.offset+i];
-              m["block"] = index;
+              // console.log(m, b.offset, i);
+              m["block"] = {number: index, start: b.offset, end: b.offset+b.bytes.length};
               markup[b.offset+i] = m;
             }
           })
+          if (DEBUG){
+            console.log("markup", markup);
+          }
           that.setState({"bytes": markup})
+          that.setState({image: url})
         });
       });
-
     }
     xhr.send();
-    return {}
+  },
+  handleImageUpload: function(){
+    console.log("upload image click", this.state.tempImage)
+    this.getImageFromURL(this.state.tempImage);
+  },
+  handleImageChange: function(e){
+    this.setState({tempImage: e.target.value})
+  },
+  handleByteChunkClick: function(byteChunk) {
+    this.setState({info: this.state.byteData[byteChunk.block.number]})
   },
   showResult: function(fr) {
     var markup, result, n, aByte, byteStr;
     markup = [];
     result = fr.result;
-    console.log("result length", result.length)
 
     for (n = 0; n < result.length; ++n) {
         aByte = result.charCodeAt(n);
@@ -75,18 +90,32 @@ var ExifPage = React.createClass({
   render: function() {
     return(
       <div>
-        <div>
-          <img src={this.props.image} />
+        <div class="row instructions">
+          <div class="col col-md-12">Upload an image to view the binary EXIF data. Highlight over the binary data to view decoded metadata.
+          </div>
+        </div>
+        <div className="row">
+          <div className="col col-md-12">
+            <img className="exifImg block" src={this.state.image} />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col col-md-12">
+            <div className="input-group exifURL">
+              <input type="text" className="textInput form-control" placeholder="URL" value={this.state.tempImage} onChange={this.handleImageChange}/>
+              <span className="input-group-btn"><button className="btn btn-default" onClick={this.handleImageUpload}>Use Image URL</button></span>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <ExifInfo bytes={this.state.bytes} />
+        <div className="row">
+          <div className="col col-md-6">
+            <ExifInfo bytes={this.state.bytes} handleClick={this.handleByteChunkClick}/>
+          </div>
+          <div className="col col-md-6">
+            <InfoDisplay info={this.state.info} exif={this.state.exif}/>
+          </div>
         </div>
-        {/*
-        <div>
-          <BinaryView bytes={this.state.bytes}/>
-        </div>
-        */}
       </div>
     )
   }

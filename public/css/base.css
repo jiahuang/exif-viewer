@@ -5,7 +5,6 @@
 	font-variant: normal;
 	font-weight: 400;
 	line-height: 16.5px;
-  margin: 20px;
 }
 
 .hexMem{
@@ -16,14 +15,79 @@
   margin: 5px 0px;
 }
 
-.byte{
+.memRow > .byte{
   padding: 3px 5px;
+  font-style: bold;
 }
 
-.highlighted {
-  background-color: blue;
+.byte{
+  padding-right: 10px;
+  font-style: bold;
 }
 
-span[data-block] {
-  background-color: yellow;
+span[data-block="clicked"] {
+  background-color: #5cb85c;
+}
+
+span[data-block="highlighted"] {
+  background-color: #485563;
+}
+
+.container{
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+.instructions{
+  margin-bottom: 20px;
+}
+
+.navbar-brand {
+  margin-left: 35px !important;
+}
+
+.tagInfo > h4 {
+  color: #df691a;
+}
+
+.tagInfo > p > .result {
+  color: #5cb85c;
+  font-style: bold;
+}
+
+.infoByte {
+  color: #5cb85c;
+  font-style: bold;
+}
+
+.binaryInfo p {
+  margin-bottom: 30px;
+}
+
+.exifDataType{
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.exifInfo > .firstRow {
+  margin: 10px 0px;
+}
+
+.exifImg {
+  max-width:400px;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.exifURL{
+  max-width:600px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 30px;
+}
+
+.block{
+  display: block;
 }
