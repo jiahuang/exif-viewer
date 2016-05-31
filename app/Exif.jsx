@@ -5,13 +5,13 @@ import EXIF from './exiflib.js';
 import ExifInfo from './ExifInfo.jsx';
 import InfoDisplay from './InfoDisplay.jsx';
 
-var DEBUG= false;
+var DEBUG = false;
 var geotag = "https://raw.githubusercontent.com/jiahuang/exif-viewer/master/app/images/geotag.jpg";
 
 var ExifPage = React.createClass({
   getInitialState: function() {
     this.getImageFromURL(this.props.image)
-    return {state: null, image: this.props.image, tempImage: ""}
+    return {state: null, image: this.props.image, tempImage: "", clickedBlock: null}
   },
   getImageFromURL: function(url){
     var that = this;
@@ -37,7 +37,7 @@ var ExifPage = React.createClass({
         var sortedBytes = EXIF.bytes.sort(function(a, b){
           return a.offset < b.offset ? -1 : 1;
         });
-        that.setState({info: {}, "byteData": sortedBytes, "exif": exif})
+        that.setState({info: {}, "byteData": sortedBytes})
         var lastOffset = sortedBytes[sortedBytes.length-1].offset
         var lastByte = lastOffset+32-lastOffset%16
         binaryReader.readAsBinaryString(blob.slice(0, lastOffset > blob.size ? blob.size : lastByte));
@@ -45,32 +45,35 @@ var ExifPage = React.createClass({
         {
           var markup = that.showResult(binaryReader, "Binary");
           sortedBytes.forEach(function(b, index){
+            if (b.type && b.tagName){
+              exif[b.tagName] = {value: exif[b.tagName], block: index};
+            }
             for(var i = 0; i<b.bytes.length; i++){
               var m = markup[b.offset+i];
-              // console.log(m, b.offset, i);
               m["block"] = {number: index, start: b.offset, end: b.offset+b.bytes.length};
               markup[b.offset+i] = m;
             }
           })
           if (DEBUG){
-            console.log("markup", markup);
+            console.log("markup", markup, "exif blocked", exif);
           }
-          that.setState({"bytes": markup})
-          that.setState({image: url})
+          that.setState({"bytes": markup, clickedBlock: -1, "exif": exif, image: url})
         });
       });
     }
     xhr.send();
   },
   handleImageUpload: function(){
-    console.log("upload image click", this.state.tempImage)
     this.getImageFromURL(this.state.tempImage);
   },
   handleImageChange: function(e){
     this.setState({tempImage: e.target.value})
   },
   handleByteChunkClick: function(byteChunk) {
-    this.setState({info: this.state.byteData[byteChunk.block.number]})
+    this.setState({clickedBlock: null, info: this.state.byteData[byteChunk.block.number]})
+  },
+  handleExifClick: function(block){
+    this.setState({clickedBlock: block, info: this.state.byteData[block]})
   },
   showResult: function(fr) {
     var markup, result, n, aByte, byteStr;
@@ -110,10 +113,10 @@ var ExifPage = React.createClass({
 
         <div className="row">
           <div className="col col-md-6">
-            <ExifInfo bytes={this.state.bytes} handleClick={this.handleByteChunkClick}/>
+            <ExifInfo bytes={this.state.bytes} handleClick={this.handleByteChunkClick} clickedBlock={this.state.clickedBlock}/>
           </div>
           <div className="col col-md-6">
-            <InfoDisplay info={this.state.info} exif={this.state.exif}/>
+            <InfoDisplay info={this.state.info} exif={this.state.exif} handleExifClick={this.handleExifClick}/>
           </div>
         </div>
       </div>

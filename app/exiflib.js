@@ -30,8 +30,8 @@
       EXIF.bytes.push(byteChunk)
     }
 
-    function addByteTag(offset, bytes, description, tagId, tagType, tagCount, value){
-      var byteChunk = {offset: offset, type: "tag", description: description, tagId: tagId, tagType: tagType, tagCount: tagCount, value: value}
+    function addByteTag(offset, bytes, description, tagId, tagType, tagCount, tagName, value){
+      var byteChunk = {offset: offset, type: "tag", description: description, tagId: tagId, tagType: tagType, tagCount: tagCount, tagName: tagName, value: value}
       byteChunk["bytes"] = bytes.map(function(byte, index){
         var byteMap = {byte: "0x"+Number(byte).toString(16)}
         return byteMap
@@ -588,7 +588,7 @@
 
             tags[tag] = readTagValue(file, entryOffset, tiffStart, dirStart, bigEnd, tag);
 
-            addByteTag(entryOffset, bytes, description, file.getUint16(entryOffset, !bigEnd), file.getUint16(entryOffset+2, !bigEnd), file.getUint32(entryOffset+4, !bigEnd), tags[tag]);
+            addByteTag(entryOffset, bytes, description, file.getUint16(entryOffset, !bigEnd), file.getUint16(entryOffset+2, !bigEnd), file.getUint32(entryOffset+4, !bigEnd), tag, tags[tag]);
         }
         return tags;
     }
@@ -851,6 +851,7 @@
     }
 
     EXIF.readFromBinaryFile = function(file) {
+        EXIF.bytes = [];
         return findEXIFinJPEG(file);
     }
 

@@ -10,9 +10,13 @@ var ExifInfo = React.createClass({
     return {bytes: this.props.bytes}
   },
   componentWillReceiveProps: function(nextProps) {
-    this.setState({
-      bytes: nextProps.bytes
-    });
+    if (nextProps.bytes) {
+      this.setState({bytes: nextProps.bytes});
+    }
+
+    if (nextProps.clickedBlock != null){
+      this.setState({clickedBlock: nextProps.clickedBlock});
+    }
   },
   handleMouseEnter: function(byte){
     if (byte.block != null) {
@@ -41,8 +45,6 @@ var ExifInfo = React.createClass({
 
       var byteStyle = "byte";
       if (block != "clicked" && byte.block) {
-      //   byteStyle = "highlighted text-info "+byteStyle;
-      // } else if (byte.block){
         byteStyle = "text-info "+byteStyle;
       }
       return(<span className={byteStyle} key={lineNum*16+index} data-block={block}

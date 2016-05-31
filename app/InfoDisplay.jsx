@@ -26,7 +26,6 @@ var TagInfo = React.createClass({
     }
   },
   render: function(){
-    console.log("tag", this.props.info)
     var tagType = this.getTagType(this.props.info.tagType)
 
     var value = this.props.info.value.valueOf();
@@ -72,8 +71,18 @@ var TagInfo = React.createClass({
 })
 
 var InfoDisplay = React.createClass({
+  propTypes: {
+    handleExifClick: React.PropTypes.func.isRequired
+  },
   getInitialState: function() {
-    return {showEXIF: false}
+    return {showEXIF: false, info: {}}
+  },
+  componentWillReceiveProps: function(nextProps) {
+    if (nextProps.info) {
+      this.setState({
+        info: nextProps.info
+      });
+    }
   },
   handleExifClick: function(){
     this.setState({showEXIF: true})
@@ -81,17 +90,28 @@ var InfoDisplay = React.createClass({
   handleBinaryClick: function(){
     this.setState({showEXIF: false})
   },
+  handleExifInfoClick: function(key, val){
+    this.props.handleExifClick(val.block);
+  },
   renderEXIF: function(){
     var keyInfo = Object.keys(this.props.exif).map(function(k){
-      var val = this.props.exif[k].valueOf()
-      if (Array.isArray(this.props.exif[k])){
-        val = this.props.exif[k].map(function(v){
-          return v.valueOf()+" ";
-        });
+      var hasVal = this.props.exif[k].value ? true: false;
+
+      var val = "This tag does not exist in this image."
+      if (hasVal) {
+        val = this.props.exif[k].value.valueOf()
+        if (Array.isArray(this.props.exif[k].value)){
+          val = this.props.exif[k].value.map(function(v){
+            return v.valueOf()+" ";
+          });
+        }
       }
+
+      var tagLink = hasVal ? (<a onClick={this.handleExifInfoClick.bind(null, k, this.props.exif[k])}>{k}</a>) : <span>{k}</span>;
+
       return (
         <p key={k}>
-          <span className="exifDataType text-primary">{k}</span> {val}
+          <span className="exifDataType text-primary">{tagLink}</span> {val}
         </p>
       )
     }.bind(this))
@@ -103,13 +123,13 @@ var InfoDisplay = React.createClass({
     )
   },
   renderContent: function(){
-    var tag = this.props.info.type && this.props.info.type == "tag" ? <TagInfo info={this.props.info}/> : null
+    var tag = this.props.info.type && this.props.info.type == "tag" ? <TagInfo info={this.state.info}/> : null
 
     var content = this.state.showEXIF ? (<div>{this.renderEXIF()}</div>) : (
       <div className="binaryInfo">
-        {this.props.info.description ? <div>
+        {this.state.info.description ? <div>
           <h4 className="text-primary">Description</h4>
-          <p>{this.props.info.description}. This is a 12 byte entry containing the following data</p>
+          <p>{this.state.info.description}.</p>
           </div>: <p>No bytes selected. Click on some bytes to view the EXIF data.</p>}
         {tag}
       </div>
