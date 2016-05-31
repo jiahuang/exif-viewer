@@ -6,3 +6,5 @@ All specs should be interactive. This is an attempt to make learning the EXIF sp
 
 ##Demo
 Demo is live at http://jiahuang.github.io/exif-viewer
+
+![screenshot](https://raw.githubusercontent.com/jiahuang/exif-viewer/master/screenshot.png)
